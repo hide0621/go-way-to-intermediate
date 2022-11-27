@@ -1,17 +1,20 @@
 package main
 
 import (
-	"io"
+	"go-way-to-intermediate/handlers" //別パッケージで定義したものを使うには「モジュール（プロジェクト）名/対象のディレクトリ(パッケージ)名」
 	"log"
 	"net/http"
 )
 
 func main() {
-	helloHandler := func(w http.ResponseWriter, req *http.Request) {
-		io.WriteString(w, "Hello, world!\n")
-	}
 
-	http.HandleFunc("/", helloHandler)
+	http.HandleFunc("/hello", handlers.HelloHandler)
+	http.HandleFunc("/article", handlers.PostArticleHandler)
+	http.HandleFunc("/article/list", handlers.ArticleListHandler)
+	http.HandleFunc("/article/1", handlers.ArticleDetailHandler)
+	http.HandleFunc("/article/nice", handlers.PostNiceHandler)
+	http.HandleFunc("/comment", handlers.PostCommentHandler)
+
 	log.Println("server start at port 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
