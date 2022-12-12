@@ -2,6 +2,7 @@ package handlers //mainパッケージ以外はファイルがあるディレク
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"go-way-to-intermediate/models"
 	"io"
@@ -16,6 +17,23 @@ func HelloHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func PostArticleHandler(w http.ResponseWriter, req *http.Request) {
+	// バイトスライス reqBodybuffer を用意するために、リクエストボディーの値の長さをチェック
+	// その後、バイトスライス reqBodybufferの変数を作成
+	length, err := strconv.Atoi(req.Header.Get("Content-Length"))
+	if err != nil {
+		http.Error(w, "cannnot get content length\n", http.StatusBadRequest)
+		return
+	}
+	reqBodybuffer := make([]byte, length)
+
+	// Readメソッドでリクエストボディを読み出し
+	if _, err := req.Body.Read(reqBodybuffer); !errors.Is(err, io.EOF) {
+		http.Error(w, "fail to get request body\n", http.StatusBadRequest)
+		return
+	}
+	// ボディを Close する
+	defer req.Body.Close()
+
 	article := models.Article1
 	jsonData, err := json.Marshal(article)
 	if err != nil {
