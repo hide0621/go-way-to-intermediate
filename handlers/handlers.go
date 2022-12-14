@@ -2,9 +2,9 @@ package handlers //mainパッケージ以外はファイルがあるディレク
 
 import (
 	"encoding/json"
-	"fmt"
 	"go-way-to-intermediate/models"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -44,14 +44,12 @@ func ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 		page = 1
 	}
 
+	// 暫定でこれを追加することで
+	// 「変数pageが使われていない」というコンパイルエラーを回避
+	log.Println(page)
+
 	articleList := []models.Article{models.Article1, models.Article2}
-	jsonData, err := json.Marshal(articleList)
-	if err != nil {
-		errMsg := fmt.Sprintf("fail to encode json(page%d)\n", page)
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
-	}
-	w.Write(jsonData)
+	json.NewEncoder(w).Encode(articleList)
 }
 
 // ハンドラとパスの紐付け部分で定義したパスパラメータをハンドラ関数内で利用する
@@ -62,34 +60,33 @@ func ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// 暫定でこれを追加することで
+	// 「変数articleIDが使われていない」というコンパイルエラーを回避
+	log.Println(articleID)
+
 	article := models.Article1
-	jsonData, err := json.Marshal(article)
-	if err != nil {
-		errMsg := fmt.Sprintf("fail to encode json(articleIC%d)\n", articleID)
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
-	}
-	w.Write(jsonData)
+	json.NewEncoder(w).Encode(article)
+
 }
 
 func PostNiceHandler(w http.ResponseWriter, req *http.Request) {
-	article := models.Article1
-	jsonData, err := json.Marshal(article)
-	if err != nil {
-		http.Error(w, "fail to encode json\n", http.StatusInternalServerError)
+	var reqArticle models.Article
+	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
+		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
 		return
 	}
 
-	w.Write(jsonData)
+	article := reqArticle
+	json.NewEncoder(w).Encode(article)
 }
 
 func PostCommentHandler(w http.ResponseWriter, req *http.Request) {
-	comment := models.Comment1
-	jsonData, err := json.Marshal(comment)
-	if err != nil {
-		http.Error(w, "fail to encode json\n", http.StatusInternalServerError)
+	var reqComment models.Comment
+	if err := json.NewDecoder(req.Body).Decode(&reqComment); err != nil {
+		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
 		return
 	}
 
-	w.Write(jsonData)
+	comment := reqComment
+	json.NewEncoder(w).Encode(comment)
 }
