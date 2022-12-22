@@ -1,4 +1,5 @@
 # 記事データ2つ
+# あえて二つ目の記事データは時間カラムをnullにしている
 insert into articles (title, contents, username, nice, created_at) values
     ('firstPost', 'This is my first blog', 'saki', 2, now());
 insert into articles (title, contents, username, nice) values 
