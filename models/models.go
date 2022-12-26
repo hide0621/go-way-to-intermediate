@@ -18,5 +18,3 @@ type Article struct {
 	CommentList []Comment `json:"comments"`
 	CreatedAt   time.Time `json:"created_at"`
 }
-
-

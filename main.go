@@ -45,37 +45,25 @@ func main() {
 	}
 	defer db.Close()
 
-	articleID := 1
+	// データを挿入する処理
+	article := models.Article{
+		Title:     "insert test",
+		Contetnts: "Can I insert data correctly?", // ここは自分で一から書いてあげないと「不定義」のエラーになる...
+		UserName:  "saki",
+	}
 	const sqlStr = `
-		select * 
-		from articles
-		where article_id = ? ; 
-	`
+        insert into articles (title, contents, username, nice, created_at) values
+        (?, ?, ?, 0, now());
+    `
 
-	// rows, err := db.Query(sqlStr, articleID)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	return
-	// }
-	// defer rows.Close()
-
-	rows := db.QueryRow(sqlStr, articleID)
-	if err := rows.Err(); err != nil {
+	result, err := db.Exec(sqlStr, article.Title, article.Contetnts, article.UserName)
+	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	var article models.Article
-	var createdTime sql.NullTime
-	// err := rows.Scan(&article.ID, &article.Title, &article.Contetnts, &article.UserName, &article.NiceNum, &article.CreatedAt)
-	err = rows.Scan(&article.ID, &article.Title, &article.Contetnts, &article.UserName, &article.NiceNum, &createdTime)
-	if err != nil {
-		fmt.Println(err)
-	}
+	// 結果を確認
+	fmt.Println(result.LastInsertId())
+	fmt.Println(result.RowsAffected())
 
-	if createdTime.Valid {
-		article.CreatedAt = createdTime.Time
-	}
-
-	fmt.Printf("%+v\n", article)
 }
