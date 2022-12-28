@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"go-way-to-intermediate/models"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -45,25 +44,43 @@ func main() {
 	}
 	defer db.Close()
 
-	// データを挿入する処理
-	article := models.Article{
-		Title:     "insert test",
-		Contetnts: "Can I insert data correctly?", // ここは自分で一から書いてあげないと「不定義」のエラーになる...
-		UserName:  "saki",
-	}
-	const sqlStr = `
-        insert into articles (title, contents, username, nice, created_at) values
-        (?, ?, ?, 0, now());
-    `
-
-	result, err := db.Exec(sqlStr, article.Title, article.Contetnts, article.UserName)
+	// トランザクションを張る（この中でクエリを実行する）
+	tx, err := db.Begin()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	// 結果を確認
-	fmt.Println(result.LastInsertId())
-	fmt.Println(result.RowsAffected())
+	article_id := 1
+	const sqlGetNice = `
+		select nice
+		from articles
+		where article_id = ?;
+	`
 
+	row := tx.QueryRow(sqlGetNice, article_id)
+	if err := row.Err(); err != nil {
+		fmt.Println(err)
+		tx.Rollback() //クエリのどこかで失敗したらロールバックして元に戻す
+		return
+	}
+
+	var nicenum int
+	err = row.Scan(&nicenum)
+	if err != nil {
+		fmt.Println(err)
+		tx.Rollback() //クエリのどこかで失敗したらロールバックして元に戻す
+		return
+	}
+
+	const sqlUpdateNice = `update articles set nice = ? where article_id = ?`
+
+	_, err = tx.Exec(sqlUpdateNice, nicenum+1, article_id)
+	if err != nil {
+		fmt.Println(err)
+		tx.Rollback() //クエリのどこかで失敗したらロールバックして元に戻す
+		return
+	}
+
+	tx.Commit() //クエリ全てが成功したのでその結果を反映させる
 }
