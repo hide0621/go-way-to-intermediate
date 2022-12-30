@@ -6,6 +6,8 @@ import (
 	"go-way-to-intermediate/models"
 	"go-way-to-intermediate/repositories"
 	"testing"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func TestSelectArticleDetail(t *testing.T) {
@@ -26,7 +28,7 @@ func TestSelectArticleDetail(t *testing.T) {
 		Title:     "firstPost",
 		Contetnts: "This is my first blog",
 		UserName:  "saki",
-		NiceNum:   2,
+		NiceNum:   3,
 	}
 
 	got, err := repositories.SelectArticleDetail(db, expected.ID)
