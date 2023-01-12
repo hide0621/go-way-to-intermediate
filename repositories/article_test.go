@@ -1,8 +1,6 @@
 package repositories_test
 
 import (
-	"database/sql"
-	"fmt"
 	"go-way-to-intermediate/models"
 	"go-way-to-intermediate/repositories"
 	"testing"
@@ -10,18 +8,22 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func TestSelectArticleDetail(t *testing.T) {
+// SelectArticleList関数のテスト
+func TestSelectArticleList(t *testing.T) {
 
-	dbUser := "docker"
-	dbPassword := "docker"
-	dbDatabase := "sampledb"
-	dbConn := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s?parseTime=true", dbUser, dbPassword, dbDatabase)
-
-	db, err := sql.Open("mysql", dbConn)
+	// テスト対象の関数を実行
+	expectedNum := 2
+	got, err := repositories.SelectArticleList(testDB, 1)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer db.Close()
+	// SelectArticleList関数から得たArticleスライスの長さが期待通りでないならFAILにする
+	if num := len(got); num != expectedNum {
+		t.Errorf("want %d but got %d articles\n", expectedNum, num)
+	}
+}
+
+func TestSelectArticleDetail(t *testing.T) {
 
 	// テーブルドリブンテストの準備
 	tests := []struct {
@@ -54,7 +56,7 @@ func TestSelectArticleDetail(t *testing.T) {
 	// サブテストを一つずつまわす
 	for _, test := range tests {
 		t.Run(test.testTitle, func(t *testing.T) {
-			got, err := repositories.SelectArticleDetail(db, test.expected.ID)
+			got, err := repositories.SelectArticleDetail(testDB, test.expected.ID)
 			if err != nil {
 				t.Fatal(err)
 			}
