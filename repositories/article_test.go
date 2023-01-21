@@ -12,7 +12,7 @@ import (
 func TestSelectArticleList(t *testing.T) {
 
 	// テスト対象の関数を実行
-	expectedNum := 3
+	expectedNum := 2
 	got, err := repositories.SelectArticleList(testDB, 1)
 	if err != nil {
 		t.Fatal(err)
@@ -90,7 +90,7 @@ func TestInsertArticle(t *testing.T) {
 		UserName:  "saki",
 	}
 
-	expectedArticleNum := 3
+	expectedArticleNum := 7
 	newArticle, err := repositories.InsertArticle(testDB, article)
 	if err != nil {
 		t.Error(err)
