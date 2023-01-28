@@ -3,6 +3,7 @@ package repositories_test
 import (
 	"go-way-to-intermediate/models"
 	"go-way-to-intermediate/repositories"
+	"go-way-to-intermediate/repositories/testdata"
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -33,23 +34,11 @@ func TestSelectArticleDetail(t *testing.T) {
 		{
 			// 記事 ID1 番のテストデータ
 			testTitle: "subtest1",
-			expected: models.Article{
-				ID:        1,
-				Title:     "firstPost",
-				Contetnts: "This is my first blog",
-				UserName:  "saki",
-				NiceNum:   3,
-			},
+			expected:  testdata.ArticleTestData[0],
 		}, {
 			// 記事 ID2 番のテストデータ
 			testTitle: "subtest2",
-			expected: models.Article{
-				ID:        2,
-				Title:     "2nd",
-				Contetnts: "Second blog post",
-				UserName:  "saki",
-				NiceNum:   4,
-			},
+			expected:  testdata.ArticleTestData[1],
 		},
 	}
 
@@ -107,4 +96,26 @@ func TestInsertArticle(t *testing.T) {
 		`
 		testDB.Exec(sqlstr, article.Title, article.Contetnts, article.UserName)
 	})
+}
+
+func TestUpdateNiceNum(t *testing.T) {
+	articleID := 1
+	before, err := repositories.SelectArticleDetail(testDB, articleID)
+	if err != nil {
+		t.Fatal("fail to get before data")
+	}
+
+	err = repositories.UpdateNiceNum(testDB, articleID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	after, err := repositories.SelectArticleDetail(testDB, articleID)
+	if err != nil {
+		t.Fatal("fail to get after data")
+	}
+
+	if after.NiceNum-before.NiceNum != 1 {
+		t.Error("fail to update nice num")
+	}
 }
