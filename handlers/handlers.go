@@ -12,16 +12,16 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// GET /hello のハンドラ
 func HelloHandler(w http.ResponseWriter, req *http.Request) {
 	io.WriteString(w, "Hello, world!\n")
 }
 
+// POST /article のハンドラ
 func PostArticleHandler(w http.ResponseWriter, req *http.Request) {
-
 	var reqArticle models.Article
 	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
 		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
-		return
 	}
 
 	article, err := services.PostArticleService(reqArticle)
@@ -29,10 +29,11 @@ func PostArticleHandler(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(article)
 
+	json.NewEncoder(w).Encode(article)
 }
 
+// GET /article/list のハンドラ
 func ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 	queryMap := req.URL.Query()
 
@@ -54,10 +55,11 @@ func ArticleListHandler(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
 		return
 	}
+
 	json.NewEncoder(w).Encode(articleList)
 }
 
-// ハンドラとパスの紐付け部分で定義したパスパラメータをハンドラ関数内で利用する
+// GET /article/{id} のハンドラ
 func ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
 	articleID, err := strconv.Atoi(mux.Vars(req)["id"])
 	if err != nil {
@@ -65,20 +67,20 @@ func ArticleDetailHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	article, err := services.GetArticleListService(articleID)
+	article, err := services.GetArticleService(articleID)
 	if err != nil {
 		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
 		return
 	}
-	json.NewEncoder(w).Encode(article)
 
+	json.NewEncoder(w).Encode(article)
 }
 
+// POST /article/nice のハンドラ
 func PostNiceHandler(w http.ResponseWriter, req *http.Request) {
 	var reqArticle models.Article
 	if err := json.NewDecoder(req.Body).Decode(&reqArticle); err != nil {
 		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
-		return
 	}
 
 	article, err := services.PostNiceService(reqArticle)
@@ -86,14 +88,15 @@ func PostNiceHandler(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "fail internal exec\n", http.StatusInternalServerError)
 		return
 	}
+
 	json.NewEncoder(w).Encode(article)
 }
 
+// POST /comment のハンドラ
 func PostCommentHandler(w http.ResponseWriter, req *http.Request) {
 	var reqComment models.Comment
 	if err := json.NewDecoder(req.Body).Decode(&reqComment); err != nil {
 		http.Error(w, "fail to decode json\n", http.StatusBadRequest)
-		return
 	}
 
 	comment, err := services.PostCommentService(reqComment)
