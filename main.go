@@ -5,13 +5,13 @@ import (
 	"database/sql"
 	"fmt"
 	"go-way-to-intermediate/controllers"
+	"go-way-to-intermediate/routers"
 	"go-way-to-intermediate/services"
 	"log"
 	"net/http"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/gorilla/mux"
 )
 
 var (
@@ -32,16 +32,8 @@ func main() {
 	ser := services.NewMyAppService(db)
 	con := controllers.NewMyAppController(ser)
 
-	// 明示的にルーターを使うことを宣言
-	r := mux.NewRouter()
-
-	//ここでHTTPメソッドと紐づけることが出来て、デフォルトで405エラーも返してくれる
-	r.HandleFunc("/hello", con.HelloHandler).Methods(http.MethodGet)
-	r.HandleFunc("/article", con.PostArticleHandler).Methods(http.MethodPost)
-	r.HandleFunc("/article/list", con.ArticleListHandler).Methods(http.MethodGet)
-	r.HandleFunc("/article/{id:[0-9]+}", con.ArticleDetailHandler).Methods(http.MethodGet) //パスパラメータで定義してハンドラ関数でそれを利用する
-	r.HandleFunc("/article/nice", con.PostNiceHandler).Methods(http.MethodPost)
-	r.HandleFunc("/comment", con.PostCommentHandler).Methods(http.MethodPost)
+	// ルーター層のNewRouter関数を呼び出して、明示的にルーターを使うことを宣言
+	r := routers.NewRouter(con)
 
 	log.Println("server start at port 8080")
 	log.Fatal(http.ListenAndServe(":8080", r)) //第二引数にルーターを指定
