@@ -7,18 +7,18 @@ import (
 	"net/http"
 	"strconv"
 
-	"go-way-to-intermediate/services"
+	"go-way-to-intermediate/controllers/services"
 
 	"github.com/gorilla/mux"
 )
 
 // コントローラ構造体を定義
 type MyAppController struct {
-	service *services.MyAppService // フィールドに MyAppService 構造体を含める
+	service services.MyAppServicer // フィールドに MyAppService 構造体を含める
 }
 
 // コンストラクタの定義
-func NewMyAppController(s *services.MyAppService) *MyAppController {
+func NewMyAppController(s services.MyAppServicer) *MyAppController {
 	return &MyAppController{service: s}
 }
 
