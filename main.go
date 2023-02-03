@@ -4,9 +4,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"go-way-to-intermediate/controllers"
-	"go-way-to-intermediate/routers"
-	"go-way-to-intermediate/services"
+	"go-way-to-intermediate/api"
 	"log"
 	"net/http"
 	"os"
@@ -29,11 +27,8 @@ func main() {
 		return
 	}
 
-	ser := services.NewMyAppService(db)
-	con := controllers.NewMyAppController(ser)
-
 	// ルーター層のNewRouter関数を呼び出して、明示的にルーターを使うことを宣言
-	r := routers.NewRouter(con)
+	r := api.NewRouter(db)
 
 	log.Println("server start at port 8080")
 	log.Fatal(http.ListenAndServe(":8080", r)) //第二引数にルーターを指定
