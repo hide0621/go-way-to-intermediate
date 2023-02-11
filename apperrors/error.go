@@ -17,3 +17,8 @@ func (myErr *MyAppError) Error() string {
 func (myErr *MyAppError) Unwrap() error {
 	return myErr.Err
 }
+
+// DB処理系のエラーをラップする
+func (code ErrCode) Wrap(err error, message string) error {
+	return &MyAppError{ErrCode: code, Message: message, Err: err}
+}
