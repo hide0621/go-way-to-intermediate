@@ -38,18 +38,33 @@ func (s *MyAppService) GetArticleListService(page int) ([]models.Article, error)
 // ArticleDetailHandlerで使うことを想定したサービス
 // 指定IDの記事情報を返却
 func (s *MyAppService) GetArticleService(articleID int) (models.Article, error) {
-	article, err := repositories.SelectArticleDetail(s.db, articleID)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			err = apperrors.NAData.Wrap(err, "no data")
+
+	var article models.Article
+	var commentList []models.Comment
+	var articleGetErr, commentGetErr error
+
+	// article, err := repositories.SelectArticleDetail(s.db, articleID)
+	go func() {
+		article, articleGetErr = repositories.SelectArticleDetail(s.db, articleID)
+	}()
+
+	if articleGetErr != nil {
+		if errors.Is(articleGetErr, sql.ErrNoRows) {
+			err := apperrors.NAData.Wrap(articleGetErr, "no data")
 			return models.Article{}, err
 		}
-		err = apperrors.GetDataFailed.Wrap(err, "fail to get data")
+		err := apperrors.GetDataFailed.Wrap(articleGetErr, "fail to get data")
 		return models.Article{}, err
 	}
-	commentList, err := repositories.SelectCommentList(s.db, articleID)
-	if err != nil {
-		err = apperrors.GetDataFailed.Wrap(err, "fail to get data")
+
+	// commentList, err := repositories.SelectCommentList(s.db, articleID)
+
+	go func() {
+		commentList, commentGetErr = repositories.SelectCommentList(s.db, articleID)
+	}()
+
+	if commentGetErr != nil {
+		err := apperrors.GetDataFailed.Wrap(commentGetErr, "fail to get data")
 		return models.Article{}, err
 	}
 
