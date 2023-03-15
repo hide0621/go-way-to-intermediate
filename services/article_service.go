@@ -6,6 +6,7 @@ import (
 	"go-way-to-intermediate/apperrors"
 	"go-way-to-intermediate/models"
 	"go-way-to-intermediate/repositories"
+	"sync"
 )
 
 // PostArticleHandlerで使うことを想定したサービス
@@ -43,10 +44,27 @@ func (s *MyAppService) GetArticleService(articleID int) (models.Article, error) 
 	var commentList []models.Comment
 	var articleGetErr, commentGetErr error
 
-	// article, err := repositories.SelectArticleDetail(s.db, articleID)
-	go func() {
-		article, articleGetErr = repositories.SelectArticleDetail(s.db, articleID)
-	}()
+	var amu sync.Mutex
+	var cmu sync.Mutex
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func(db *sql.DB, articleID int) {
+		defer wg.Done()
+		amu.Lock()
+		article, articleGetErr = repositories.SelectArticleDetail(db, articleID)
+		amu.Unlock()
+	}(s.db, articleID)
+
+	go func(db *sql.DB, articleID int) {
+		defer wg.Done()
+		cmu.Lock()
+		commentList, commentGetErr = repositories.SelectCommentList(s.db, articleID)
+		cmu.Unlock()
+	}(s.db, articleID)
+
+	wg.Wait()
 
 	if articleGetErr != nil {
 		if errors.Is(articleGetErr, sql.ErrNoRows) {
@@ -56,12 +74,6 @@ func (s *MyAppService) GetArticleService(articleID int) (models.Article, error) 
 		err := apperrors.GetDataFailed.Wrap(articleGetErr, "fail to get data")
 		return models.Article{}, err
 	}
-
-	// commentList, err := repositories.SelectCommentList(s.db, articleID)
-
-	go func() {
-		commentList, commentGetErr = repositories.SelectCommentList(s.db, articleID)
-	}()
 
 	if commentGetErr != nil {
 		err := apperrors.GetDataFailed.Wrap(commentGetErr, "fail to get data")
